@@ -4,7 +4,11 @@ The Cert-Central Terraform provider allows you to manage SSL/TLS certificate con
 
 This provider is designed to interface with **cert-central**, a custom, containerized certificate manager solution currently supporting Let's Encrypt and ZeroSSL. Built on top of the `lego` Go library, it has the capacity to support more ACME providers in the future. The cert-central control plane is scheduled to be released and open-sourced in the near future.
 
+> [!IMPORTANT]
+> **Disclaimer:** This provider is for testing purposes only and is currently **not usable** if you do not have access to the private `cert-central` backend. It will become fully functional for general use once the control plane is released and open-sourced.
+
 ---
+
 
 ## Requirements
 
