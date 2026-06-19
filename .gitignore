@@ -1,0 +1,27 @@
+# Compiled binaries
+terraform-provider-certcentral
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go build files
+/debug
+/bin
+/dist
+
+# Terraform local directories
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
