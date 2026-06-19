@@ -83,7 +83,9 @@ type CertConfig struct {
 }
 
 type APIKeyConfig struct {
-	Token          string   `json:"token"`
+	Name           string   `json:"name"`
+	Token          string   `json:"token,omitempty"`
+	CleartextToken string   `json:"cleartext_token,omitempty"`
 	AllowedDomains []string `json:"allowed_domains,omitempty"`
 	Admin          bool     `json:"admin"`
 }
@@ -126,16 +128,18 @@ func (c *Client) GetAPIKeys(ctx context.Context) ([]APIKeyConfig, error) {
 	return resp, err
 }
 
-func (c *Client) CreateAPIKey(ctx context.Context, key APIKeyConfig) error {
-	return c.sendRequest(ctx, "POST", "/api/v1/config/api_keys", key, nil)
+func (c *Client) CreateAPIKey(ctx context.Context, key APIKeyConfig) (APIKeyConfig, error) {
+	var resp APIKeyConfig
+	err := c.sendRequest(ctx, "POST", "/api/v1/config/api_keys", key, &resp)
+	return resp, err
 }
 
 func (c *Client) UpdateAPIKey(ctx context.Context, key APIKeyConfig) error {
 	return c.sendRequest(ctx, "PUT", "/api/v1/config/api_keys", key, nil)
 }
 
-func (c *Client) DeleteAPIKey(ctx context.Context, token string) error {
-	path := fmt.Sprintf("/api/v1/config/api_keys?token=%s", token)
+func (c *Client) DeleteAPIKey(ctx context.Context, name string) error {
+	path := fmt.Sprintf("/api/v1/config/api_keys?name=%s", name)
 	return c.sendRequest(ctx, "DELETE", path, nil, nil)
 }
 

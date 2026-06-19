@@ -14,7 +14,7 @@ Manages an API key token configuration in cert-central.
 
 ```terraform
 resource "certcentral_api_key" "web_client" {
-  token           = "$argon2id$v=19$m=65536,t=3,p=2$..." # Argon2id hash of the token
+  name            = "web-client"
   allowed_domains = ["example.com"]
   admin           = false
 }
@@ -26,8 +26,12 @@ resource "certcentral_api_key" "web_client" {
 ### Required
 
 - `admin` (Boolean) Indicates if this is an administrative token with access to control plane APIs.
-- `token` (String) The Argon2id hash of the token (acts as the unique identifier).
+- `name` (String) The unique name of the API key configuration.
 
 ### Optional
 
 - `allowed_domains` (List of String) The list of domains this standard token is authorized to fetch certs for.
+
+### Read-Only
+
+- `cleartext_token` (String, Sensitive) The generated plaintext token (sensitive). Only available on creation.

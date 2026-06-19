@@ -68,6 +68,22 @@ func TestClient_CRUD(t *testing.T) {
 			}
 			return
 		}
+		if r.URL.Path == "/api/v1/config/api_keys" {
+			if r.Method == "GET" {
+				_ = json.NewEncoder(w).Encode([]APIKeyConfig{{Name: "test-key"}})
+			} else if r.Method == "POST" {
+				w.WriteHeader(http.StatusCreated)
+				_ = json.NewEncoder(w).Encode(APIKeyConfig{
+					Name:           "test-key",
+					CleartextToken: "generated-token",
+				})
+			} else if r.Method == "PUT" {
+				w.WriteHeader(http.StatusOK)
+			} else if r.Method == "DELETE" {
+				w.WriteHeader(http.StatusNoContent)
+			}
+			return
+		}
 		if r.URL.Path == "/api/v1/certificates" && r.Method == "GET" {
 			_ = json.NewEncoder(w).Encode([]CertificateData{{Domain: "test.com", Certificate: "PEM"}})
 			return
@@ -97,6 +113,28 @@ func TestClient_CRUD(t *testing.T) {
 		err = c.DeleteCertificate(context.Background(), "test.com")
 		if err != nil {
 			t.Errorf("DeleteCertificate failed: %v", err)
+		}
+	})
+
+	t.Run("APIKeys", func(t *testing.T) {
+		keys, err := c.GetAPIKeys(context.Background())
+		if err != nil || len(keys) != 1 || keys[0].Name != "test-key" {
+			t.Errorf("GetAPIKeys failed: %v, keys: %+v", err, keys)
+		}
+
+		createdKey, err := c.CreateAPIKey(context.Background(), APIKeyConfig{Name: "test-key"})
+		if err != nil || createdKey.CleartextToken != "generated-token" {
+			t.Errorf("CreateAPIKey failed: %v, createdKey: %+v", err, createdKey)
+		}
+
+		err = c.UpdateAPIKey(context.Background(), APIKeyConfig{Name: "test-key", Admin: true})
+		if err != nil {
+			t.Errorf("UpdateAPIKey failed: %v", err)
+		}
+
+		err = c.DeleteAPIKey(context.Background(), "test-key")
+		if err != nil {
+			t.Errorf("DeleteAPIKey failed: %v", err)
 		}
 	})
 

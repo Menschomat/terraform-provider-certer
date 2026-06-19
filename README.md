@@ -130,20 +130,29 @@ resource "certcentral_certificate" "example" {
 
 ### 2. `certcentral_api_key`
 
-Manages client API keys and access scopes in `cert-central`. Standard API keys can be restricted to only fetch certificates for specific domains.
+Manages client API keys and access scopes in `cert-central`. On creation, the server automatically generates a secure 32-byte token and returns it in cleartext.
 
 ```hcl
 resource "certcentral_api_key" "web_client" {
-  token           = "$argon2id$v=19$m=65536,t=3,p=2$..." # Argon2id hash of the token
+  name            = "web-client-token"
   allowed_domains = ["example.com"]
   admin           = false
+}
+
+# The generated cleartext token can be retrieved from state:
+output "web_client_token" {
+  value     = certcentral_api_key.web_client.cleartext_token
+  sensitive = true
 }
 ```
 
 #### Argument Reference
-* `token` (String, Required) - The Argon2id hash of the API key token (acts as the unique identifier). Changing this triggers resource replacement.
+* `name` (String, Required) - The unique name of the API key configuration. Changing this triggers resource replacement.
 * `allowed_domains` (List of String, Optional) - Domains this standard token is allowed to fetch certificates for.
 * `admin` (Boolean, Required) - If `true`, this token has administrative rights to call the control plane endpoints and cannot be used to fetch raw certificate private keys.
+
+#### Attribute Reference
+* `cleartext_token` (String, Computed, Sensitive) - The generated plaintext token value. This is only returned by the server on creation and cannot be retrieved on subsequent reads.
 
 ---
 
