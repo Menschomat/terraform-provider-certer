@@ -2,6 +2,9 @@
 
 The Cert-Central Terraform provider allows you to manage SSL/TLS certificate configurations, provision access keys, and fetch issued certificates directly within your Terraform workflows.
 
+This provider is designed to interface with **cert-central**, a custom, containerized Let's Encrypt certificate manager solution. The cert-central control plane is scheduled to be released and open-sourced in the near future.
+
+
 ---
 
 ## Requirements
