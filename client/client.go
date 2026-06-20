@@ -77,10 +77,17 @@ func (c *Client) sendRequest(ctx context.Context, method, path string, bodyVal i
 	return nil
 }
 
+type TeamConfig struct {
+	ID          string `json:"id,omitempty"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+}
+
 type CertConfig struct {
 	ID          string   `json:"id,omitempty"`
 	Primary     string   `json:"primary"`
 	Sans        []string `json:"sans,omitempty"`
+	TeamID      string   `json:"team_id"`
 	Description string   `json:"description,omitempty"`
 }
 
@@ -90,6 +97,7 @@ type APIKeyConfig struct {
 	CleartextToken string   `json:"cleartext_token,omitempty"`
 	Description    string   `json:"description,omitempty"`
 	AllowedDomains []string `json:"allowed_domains,omitempty"`
+	AllowedTeams   []string `json:"allowed_teams,omitempty"`
 	Admin          bool     `json:"admin"`
 }
 
@@ -154,5 +162,28 @@ func (c *Client) GetCertificateData(ctx context.Context) ([]CertificateData, err
 	var resp []CertificateData
 	err := c.sendRequest(ctx, "GET", "/api/v1/certificates", nil, &resp)
 	return resp, err
+}
+
+// Team Config CRUD
+func (c *Client) GetTeams(ctx context.Context) ([]TeamConfig, error) {
+	var resp []TeamConfig
+	err := c.sendRequest(ctx, "GET", "/api/v1/config/teams", nil, &resp)
+	return resp, err
+}
+
+func (c *Client) CreateTeam(ctx context.Context, team TeamConfig) (TeamConfig, error) {
+	var resp TeamConfig
+	err := c.sendRequest(ctx, "POST", "/api/v1/config/teams", team, &resp)
+	return resp, err
+}
+
+func (c *Client) UpdateTeam(ctx context.Context, id string, team TeamConfig) error {
+	path := fmt.Sprintf("/api/v1/config/teams/%s", id)
+	return c.sendRequest(ctx, "PUT", path, team, nil)
+}
+
+func (c *Client) DeleteTeam(ctx context.Context, id string) error {
+	path := fmt.Sprintf("/api/v1/config/teams/%s", id)
+	return c.sendRequest(ctx, "DELETE", path, nil, nil)
 }
 

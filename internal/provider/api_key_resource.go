@@ -25,6 +25,7 @@ type APIKeyResourceModel struct {
 	Description    types.String   `tfsdk:"description"`
 	CleartextToken types.String   `tfsdk:"cleartext_token"`
 	AllowedDomains []types.String `tfsdk:"allowed_domains"`
+	AllowedTeams   []types.String `tfsdk:"allowed_teams"`
 	Admin          types.Bool     `tfsdk:"admin"`
 }
 
@@ -61,6 +62,11 @@ func (r *APIKeyResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				MarkdownDescription: "The list of domains this standard token is authorized to fetch certs for.",
 				Optional:            true,
 			},
+			"allowed_teams": schema.ListAttribute{
+				ElementType:         types.StringType,
+				MarkdownDescription: "The list of team UUIDs this token is scoped to for certificate retrieval.",
+				Optional:            true,
+			},
 			"admin": schema.BoolAttribute{
 				MarkdownDescription: "Indicates if this is an administrative token with access to control plane APIs.",
 				Required:            true,
@@ -95,9 +101,15 @@ func (r *APIKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		allowed = append(allowed, ad.ValueString())
 	}
 
+	allowedTeams := []string{}
+	for _, at := range data.AllowedTeams {
+		allowedTeams = append(allowedTeams, at.ValueString())
+	}
+
 	key := client.APIKeyConfig{
 		Description:    data.Description.ValueString(),
 		AllowedDomains: allowed,
+		AllowedTeams:   allowedTeams,
 		Admin:          data.Admin.ValueBool(),
 	}
 
@@ -137,6 +149,11 @@ func (r *APIKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 				allowedVal = append(allowedVal, types.StringValue(ad))
 			}
 			data.AllowedDomains = allowedVal
+			allowedTeamsVal := []types.String{}
+			for _, at := range k.AllowedTeams {
+				allowedTeamsVal = append(allowedTeamsVal, types.StringValue(at))
+			}
+			data.AllowedTeams = allowedTeamsVal
 			break
 		}
 	}
@@ -170,10 +187,16 @@ func (r *APIKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		allowed = append(allowed, ad.ValueString())
 	}
 
+	allowedTeams := []string{}
+	for _, at := range data.AllowedTeams {
+		allowedTeams = append(allowedTeams, at.ValueString())
+	}
+
 	key := client.APIKeyConfig{
 		ID:             data.ID.ValueString(),
 		Description:    data.Description.ValueString(),
 		AllowedDomains: allowed,
+		AllowedTeams:   allowedTeams,
 		Admin:          data.Admin.ValueBool(),
 	}
 

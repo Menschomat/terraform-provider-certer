@@ -24,6 +24,7 @@ type CertificateResourceModel struct {
 	ID          types.String   `tfsdk:"id"`
 	Primary     types.String   `tfsdk:"primary"`
 	Sans        []types.String `tfsdk:"sans"`
+	TeamID      types.String   `tfsdk:"team_id"`
 	Description types.String   `tfsdk:"description"`
 }
 
@@ -54,6 +55,10 @@ func (r *CertificateResource) Schema(ctx context.Context, req resource.SchemaReq
 				ElementType:         types.StringType,
 				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate.",
 				Optional:            true,
+			},
+			"team_id": schema.StringAttribute{
+				MarkdownDescription: "The unique UUID identifier of the team that owns this certificate configuration.",
+				Required:            true,
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "A description of the certificate configuration.",
@@ -92,6 +97,7 @@ func (r *CertificateResource) Create(ctx context.Context, req resource.CreateReq
 	cert := client.CertConfig{
 		Primary:     data.Primary.ValueString(),
 		Sans:        sans,
+		TeamID:      data.TeamID.ValueString(),
 		Description: data.Description.ValueString(),
 	}
 
@@ -124,6 +130,7 @@ func (r *CertificateResource) Read(ctx context.Context, req resource.ReadRequest
 		if c.ID == data.ID.ValueString() {
 			found = true
 			data.Primary = types.StringValue(c.Primary)
+			data.TeamID = types.StringValue(c.TeamID)
 			data.Description = types.StringValue(c.Description)
 			sansVal := []types.String{}
 			for _, s := range c.Sans {
@@ -157,6 +164,7 @@ func (r *CertificateResource) Update(ctx context.Context, req resource.UpdateReq
 	cert := client.CertConfig{
 		Primary:     data.Primary.ValueString(),
 		Sans:        sans,
+		TeamID:      data.TeamID.ValueString(),
 		Description: data.Description.ValueString(),
 	}
 

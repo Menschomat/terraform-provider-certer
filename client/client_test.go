@@ -90,6 +90,23 @@ func TestClient_CRUD(t *testing.T) {
 			}
 			return
 		}
+		if r.URL.Path == "/api/v1/config/teams" {
+			if r.Method == "GET" {
+				_ = json.NewEncoder(w).Encode([]TeamConfig{{ID: "test-team-id", Name: "test-team"}})
+			} else if r.Method == "POST" {
+				w.WriteHeader(http.StatusCreated)
+				_ = json.NewEncoder(w).Encode(TeamConfig{ID: "new-team-id", Name: "new-team"})
+			}
+			return
+		}
+		if r.URL.Path == "/api/v1/config/teams/test-team-id" {
+			if r.Method == "PUT" {
+				w.WriteHeader(http.StatusOK)
+			} else if r.Method == "DELETE" {
+				w.WriteHeader(http.StatusNoContent)
+			}
+			return
+		}
 		if r.URL.Path == "/api/v1/certificates" && r.Method == "GET" {
 			_ = json.NewEncoder(w).Encode([]CertificateData{{Domain: "test.com", Certificate: "PEM"}})
 			return
@@ -148,6 +165,28 @@ func TestClient_CRUD(t *testing.T) {
 		data, err := c.GetCertificateData(context.Background())
 		if err != nil || len(data) != 1 || data[0].Certificate != "PEM" {
 			t.Errorf("GetCertificateData failed: %v, data: %+v", err, data)
+		}
+	})
+
+	t.Run("Teams", func(t *testing.T) {
+		teams, err := c.GetTeams(context.Background())
+		if err != nil || len(teams) != 1 || teams[0].ID != "test-team-id" {
+			t.Errorf("GetTeams failed: %v, teams: %+v", err, teams)
+		}
+
+		createdTeam, err := c.CreateTeam(context.Background(), TeamConfig{Name: "new-team"})
+		if err != nil || createdTeam.ID != "new-team-id" {
+			t.Errorf("CreateTeam failed: %v, createdTeam: %+v", err, createdTeam)
+		}
+
+		err = c.UpdateTeam(context.Background(), "test-team-id", TeamConfig{Name: "updated-team"})
+		if err != nil {
+			t.Errorf("UpdateTeam failed: %v", err)
+		}
+
+		err = c.DeleteTeam(context.Background(), "test-team-id")
+		if err != nil {
+			t.Errorf("DeleteTeam failed: %v", err)
 		}
 	})
 }
