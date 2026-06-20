@@ -15,6 +15,7 @@ Manages a certificate configuration in cert-central.
 ```terraform
 resource "certcentral_certificate" "example" {
   primary = "example.com"
+  team_id = certcentral_team.example.id
   sans    = [
     "*.example.com",
     "www.example.com"
@@ -28,7 +29,13 @@ resource "certcentral_certificate" "example" {
 ### Required
 
 - `primary` (String) The primary domain name (e.g. example.com).
+- `team_id` (String) The unique UUID identifier of the team that owns this certificate configuration.
 
 ### Optional
 
+- `description` (String) A description of the certificate configuration.
 - `sans` (List of String) Subject Alternative Names (SANs) for the certificate.
+
+### Read-Only
+
+- `id` (String) The unique UUID identifier of the certificate configuration.

@@ -14,8 +14,9 @@ Manages an API key token configuration in cert-central.
 
 ```terraform
 resource "certcentral_api_key" "web_client" {
-  name            = "web-client"
+  description     = "web-client"
   allowed_domains = ["example.com"]
+  allowed_teams   = [certcentral_team.example.id]
   admin           = false
 }
 ```
@@ -26,12 +27,14 @@ resource "certcentral_api_key" "web_client" {
 ### Required
 
 - `admin` (Boolean) Indicates if this is an administrative token with access to control plane APIs.
-- `name` (String) The unique name of the API key configuration.
 
 ### Optional
 
 - `allowed_domains` (List of String) The list of domains this standard token is authorized to fetch certs for.
+- `allowed_teams` (List of String) The list of team UUIDs this token is scoped to for certificate retrieval.
+- `description` (String) A description of the API key configuration.
 
 ### Read-Only
 
 - `cleartext_token` (String, Sensitive) The generated plaintext token (sensitive). Only available on creation.
+- `id` (String) The unique UUID identifier of the API key configuration.

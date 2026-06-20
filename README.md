@@ -114,13 +114,34 @@ provider "certcentral" {
 
 ## Resources
 
-### 1. `certcentral_certificate`
+### 1. `certcentral_team`
+
+Manages a team configuration in `cert-central`. On creation, the server automatically generates a unique UUID v7 identifier for the team.
+
+```hcl
+resource "certcentral_team" "example" {
+  name        = "example-team"
+  description = "Example Team Description"
+}
+```
+
+#### Argument Reference
+* `name` (String, Required) - The name of the team.
+* `description` (String, Optional) - A description of the team.
+
+#### Attribute Reference
+* `id` (String, Computed) - The unique UUID identifier of the team.
+
+---
+
+### 2. `certcentral_certificate`
 
 Manages a certificate configuration in the background renewal scheduler. When created, `cert-central` automatically schedules DNS-01/HTTP-01 ACME challenges to issue the certificate.
 
 ```hcl
 resource "certcentral_certificate" "example" {
   primary = "example.com"
+  team_id = certcentral_team.example.id
   sans    = [
     "*.example.com",
     "www.example.com"
@@ -130,18 +151,20 @@ resource "certcentral_certificate" "example" {
 
 #### Argument Reference
 * `primary` (String, Required) - The primary domain name for the certificate. Changing this triggers resource replacement.
+* `team_id` (String, Required) - The unique UUID identifier of the team that owns this certificate configuration.
 * `sans` (List of String, Optional) - Subject Alternative Names (SANs) for the certificate.
 
 ---
 
-### 2. `certcentral_api_key`
+### 3. `certcentral_api_key`
 
 Manages client API keys and access scopes in `cert-central`. On creation, the server automatically generates a secure 32-byte token and returns it in cleartext.
 
 ```hcl
 resource "certcentral_api_key" "web_client" {
-  name            = "web-client-token"
+  description     = "web-client-token"
   allowed_domains = ["example.com"]
+  allowed_teams   = [certcentral_team.example.id]
   admin           = false
 }
 
@@ -153,8 +176,9 @@ output "web_client_token" {
 ```
 
 #### Argument Reference
-* `name` (String, Required) - The unique name of the API key configuration. Changing this triggers resource replacement.
+* `description` (String, Optional) - A description of the API key configuration.
 * `allowed_domains` (List of String, Optional) - Domains this standard token is allowed to fetch certificates for.
+* `allowed_teams` (List of String, Optional) - The list of team UUIDs this token is scoped to for certificate retrieval.
 * `admin` (Boolean, Required) - If `true`, this token has administrative rights to call the control plane endpoints and cannot be used to fetch raw certificate private keys.
 
 #### Attribute Reference
