@@ -19,13 +19,14 @@ type CertificateDataSource struct {
 }
 
 type CertificateDataSourceModel struct {
-	Domain       types.String   `tfsdk:"domain"`
-	Sans         []types.String `tfsdk:"sans"`
-	Issued       types.Bool     `tfsdk:"issued"`
-	Certificate  types.String   `tfsdk:"certificate"`
-	PrivateKey   types.String   `tfsdk:"private_key"`
-	CertFilename types.String   `tfsdk:"cert_filename"`
-	KeyFilename  types.String   `tfsdk:"key_filename"`
+	CertificateID types.String   `tfsdk:"certificate_id"`
+	Domain        types.String   `tfsdk:"domain"`
+	Sans          []types.String `tfsdk:"sans"`
+	Issued        types.Bool     `tfsdk:"issued"`
+	Certificate   types.String   `tfsdk:"certificate"`
+	PrivateKey    types.String   `tfsdk:"private_key"`
+	CertFilename  types.String   `tfsdk:"cert_filename"`
+	KeyFilename   types.String   `tfsdk:"key_filename"`
 }
 
 func NewCertificateDataSource() datasource.DataSource {
@@ -38,11 +39,15 @@ func (d *CertificateDataSource) Metadata(ctx context.Context, req datasource.Met
 
 func (d *CertificateDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Fetches certificate PEM data and private keys for a given domain from cert-central.",
+		MarkdownDescription: "Fetches certificate PEM data and private keys for a given certificate configuration ID (UUID) from cert-central.",
 		Attributes: map[string]schema.Attribute{
-			"domain": schema.StringAttribute{
-				MarkdownDescription: "The primary domain name to fetch the certificate data for.",
+			"certificate_id": schema.StringAttribute{
+				MarkdownDescription: "The unique UUID identifier of the certificate configuration to fetch.",
 				Required:            true,
+			},
+			"domain": schema.StringAttribute{
+				MarkdownDescription: "The primary domain name of the certificate.",
+				Computed:            true,
 			},
 			"sans": schema.ListAttribute{
 				ElementType:         types.StringType,
@@ -104,8 +109,9 @@ func (d *CertificateDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	found := false
 	for _, c := range certs {
-		if c.Domain == data.Domain.ValueString() {
+		if c.ID == data.CertificateID.ValueString() {
 			found = true
+			data.Domain = types.StringValue(c.Domain)
 			sansVal := []types.String{}
 			for _, s := range c.Sans {
 				sansVal = append(sansVal, types.StringValue(s))
@@ -121,7 +127,7 @@ func (d *CertificateDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	if !found {
-		resp.Diagnostics.AddError("Certificate Not Found", fmt.Sprintf("No certificate found for domain %q. Make sure it is configured and has been issued.", data.Domain.ValueString()))
+		resp.Diagnostics.AddError("Certificate Not Found", fmt.Sprintf("No certificate found for ID %q. Make sure it is configured and has been issued.", data.CertificateID.ValueString()))
 		return
 	}
 

@@ -78,19 +78,23 @@ func (c *Client) sendRequest(ctx context.Context, method, path string, bodyVal i
 }
 
 type CertConfig struct {
-	Primary string   `json:"primary"`
-	Sans    []string `json:"sans,omitempty"`
+	ID          string   `json:"id,omitempty"`
+	Primary     string   `json:"primary"`
+	Sans        []string `json:"sans,omitempty"`
+	Description string   `json:"description,omitempty"`
 }
 
 type APIKeyConfig struct {
-	Name           string   `json:"name"`
+	ID             string   `json:"id,omitempty"`
 	Token          string   `json:"token,omitempty"`
 	CleartextToken string   `json:"cleartext_token,omitempty"`
+	Description    string   `json:"description,omitempty"`
 	AllowedDomains []string `json:"allowed_domains,omitempty"`
 	Admin          bool     `json:"admin"`
 }
 
 type CertificateData struct {
+	ID           string   `json:"id"`
 	Domain       string   `json:"domain"`
 	Sans         []string `json:"sans"`
 	Issued       bool     `json:"issued"`
@@ -107,17 +111,19 @@ func (c *Client) GetCertificates(ctx context.Context) ([]CertConfig, error) {
 	return resp, err
 }
 
-func (c *Client) CreateCertificate(ctx context.Context, cert CertConfig) error {
-	return c.sendRequest(ctx, "POST", "/api/v1/config/certificates", cert, nil)
+func (c *Client) CreateCertificate(ctx context.Context, cert CertConfig) (CertConfig, error) {
+	var resp CertConfig
+	err := c.sendRequest(ctx, "POST", "/api/v1/config/certificates", cert, &resp)
+	return resp, err
 }
 
-func (c *Client) UpdateCertificate(ctx context.Context, primary string, cert CertConfig) error {
-	path := fmt.Sprintf("/api/v1/config/certificates/%s", primary)
+func (c *Client) UpdateCertificate(ctx context.Context, id string, cert CertConfig) error {
+	path := fmt.Sprintf("/api/v1/config/certificates/%s", id)
 	return c.sendRequest(ctx, "PUT", path, cert, nil)
 }
 
-func (c *Client) DeleteCertificate(ctx context.Context, primary string) error {
-	path := fmt.Sprintf("/api/v1/config/certificates/%s", primary)
+func (c *Client) DeleteCertificate(ctx context.Context, id string) error {
+	path := fmt.Sprintf("/api/v1/config/certificates/%s", id)
 	return c.sendRequest(ctx, "DELETE", path, nil, nil)
 }
 
@@ -135,11 +141,12 @@ func (c *Client) CreateAPIKey(ctx context.Context, key APIKeyConfig) (APIKeyConf
 }
 
 func (c *Client) UpdateAPIKey(ctx context.Context, key APIKeyConfig) error {
-	return c.sendRequest(ctx, "PUT", "/api/v1/config/api_keys", key, nil)
+	path := fmt.Sprintf("/api/v1/config/api_keys/%s", key.ID)
+	return c.sendRequest(ctx, "PUT", path, key, nil)
 }
 
-func (c *Client) DeleteAPIKey(ctx context.Context, name string) error {
-	path := fmt.Sprintf("/api/v1/config/api_keys?name=%s", name)
+func (c *Client) DeleteAPIKey(ctx context.Context, id string) error {
+	path := fmt.Sprintf("/api/v1/config/api_keys/%s", id)
 	return c.sendRequest(ctx, "DELETE", path, nil, nil)
 }
 

@@ -21,8 +21,10 @@ type CertificateResource struct {
 }
 
 type CertificateResourceModel struct {
-	Primary types.String   `tfsdk:"primary"`
-	Sans    []types.String `tfsdk:"sans"`
+	ID          types.String   `tfsdk:"id"`
+	Primary     types.String   `tfsdk:"primary"`
+	Sans        []types.String `tfsdk:"sans"`
+	Description types.String   `tfsdk:"description"`
 }
 
 func NewCertificateResource() resource.Resource {
@@ -37,16 +39,24 @@ func (r *CertificateResource) Schema(ctx context.Context, req resource.SchemaReq
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a certificate configuration in cert-central.",
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				MarkdownDescription: "The unique UUID identifier of the certificate configuration.",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"primary": schema.StringAttribute{
 				MarkdownDescription: "The primary domain name (e.g. example.com).",
 				Required:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"sans": schema.ListAttribute{
 				ElementType:         types.StringType,
 				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate.",
+				Optional:            true,
+			},
+			"description": schema.StringAttribute{
+				MarkdownDescription: "A description of the certificate configuration.",
 				Optional:            true,
 			},
 		},
@@ -80,15 +90,18 @@ func (r *CertificateResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	cert := client.CertConfig{
-		Primary: data.Primary.ValueString(),
-		Sans:    sans,
+		Primary:     data.Primary.ValueString(),
+		Sans:        sans,
+		Description: data.Description.ValueString(),
 	}
 
-	err := r.client.CreateCertificate(ctx, cert)
+	createdCert, err := r.client.CreateCertificate(ctx, cert)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create certificate: %s", err))
 		return
 	}
+
+	data.ID = types.StringValue(createdCert.ID)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -108,8 +121,10 @@ func (r *CertificateResource) Read(ctx context.Context, req resource.ReadRequest
 
 	found := false
 	for _, c := range certs {
-		if c.Primary == data.Primary.ValueString() {
+		if c.ID == data.ID.ValueString() {
 			found = true
+			data.Primary = types.StringValue(c.Primary)
+			data.Description = types.StringValue(c.Description)
 			sansVal := []types.String{}
 			for _, s := range c.Sans {
 				sansVal = append(sansVal, types.StringValue(s))
@@ -140,11 +155,12 @@ func (r *CertificateResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	cert := client.CertConfig{
-		Primary: data.Primary.ValueString(),
-		Sans:    sans,
+		Primary:     data.Primary.ValueString(),
+		Sans:        sans,
+		Description: data.Description.ValueString(),
 	}
 
-	err := r.client.UpdateCertificate(ctx, data.Primary.ValueString(), cert)
+	err := r.client.UpdateCertificate(ctx, data.ID.ValueString(), cert)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update certificate: %s", err))
 		return
@@ -160,7 +176,7 @@ func (r *CertificateResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	err := r.client.DeleteCertificate(ctx, data.Primary.ValueString())
+	err := r.client.DeleteCertificate(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete certificate: %s", err))
 		return

@@ -3,18 +3,18 @@
 page_title: "certcentral_certificate_data Data Source - terraform-provider-certcentral"
 subcategory: ""
 description: |-
-  Fetches certificate PEM data and private keys for a given domain from cert-central.
+  Fetches certificate PEM data and private keys for a given certificate configuration ID (UUID) from cert-central.
 ---
 
 # certcentral_certificate_data (Data Source)
 
-Fetches certificate PEM data and private keys for a given domain from cert-central.
+Fetches certificate PEM data and private keys for a given certificate configuration ID (UUID) from cert-central.
 
 ## Example Usage
 
 ```terraform
 data "certcentral_certificate_data" "example" {
-  domain = "example.com"
+  certificate_id = "019035a1-7b00-7521-8280-60b6adbf47eb"
 }
 ```
 
@@ -23,12 +23,13 @@ data "certcentral_certificate_data" "example" {
 
 ### Required
 
-- `domain` (String) The primary domain name to fetch the certificate data for.
+- `certificate_id` (String) The unique UUID identifier of the certificate configuration to fetch.
 
 ### Read-Only
 
 - `cert_filename` (String) The file name of the certificate in the storage directory.
 - `certificate` (String, Sensitive) The PEM-encoded certificate chain.
+- `domain` (String) The primary domain name of the certificate.
 - `issued` (Boolean) Whether the certificate has been issued and stored.
 - `key_filename` (String) The file name of the private key in the storage directory.
 - `private_key` (String, Sensitive) The PEM-encoded private key.

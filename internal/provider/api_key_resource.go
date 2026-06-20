@@ -21,7 +21,8 @@ type APIKeyResource struct {
 }
 
 type APIKeyResourceModel struct {
-	Name           types.String   `tfsdk:"name"`
+	ID             types.String   `tfsdk:"id"`
+	Description    types.String   `tfsdk:"description"`
 	CleartextToken types.String   `tfsdk:"cleartext_token"`
 	AllowedDomains []types.String `tfsdk:"allowed_domains"`
 	Admin          types.Bool     `tfsdk:"admin"`
@@ -39,12 +40,16 @@ func (r *APIKeyResource) Schema(ctx context.Context, req resource.SchemaRequest,
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages an API key token configuration in cert-central.",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "The unique name of the API key configuration.",
-				Required:            true,
+			"id": schema.StringAttribute{
+				MarkdownDescription: "The unique UUID identifier of the API key configuration.",
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+			"description": schema.StringAttribute{
+				MarkdownDescription: "A description of the API key configuration.",
+				Optional:            true,
 			},
 			"cleartext_token": schema.StringAttribute{
 				MarkdownDescription: "The generated plaintext token (sensitive). Only available on creation.",
@@ -91,7 +96,7 @@ func (r *APIKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	key := client.APIKeyConfig{
-		Name:           data.Name.ValueString(),
+		Description:    data.Description.ValueString(),
 		AllowedDomains: allowed,
 		Admin:          data.Admin.ValueBool(),
 	}
@@ -102,6 +107,7 @@ func (r *APIKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	data.ID = types.StringValue(createdKey.ID)
 	data.CleartextToken = types.StringValue(createdKey.CleartextToken)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -122,14 +128,15 @@ func (r *APIKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	found := false
 	for _, k := range keys {
-		if k.Name == data.Name.ValueString() {
+		if k.ID == data.ID.ValueString() {
 			found = true
+			data.Description = types.StringValue(k.Description)
+			data.Admin = types.BoolValue(k.Admin)
 			allowedVal := []types.String{}
 			for _, ad := range k.AllowedDomains {
 				allowedVal = append(allowedVal, types.StringValue(ad))
 			}
 			data.AllowedDomains = allowedVal
-			data.Admin = types.BoolValue(k.Admin)
 			break
 		}
 	}
@@ -164,7 +171,8 @@ func (r *APIKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	key := client.APIKeyConfig{
-		Name:           data.Name.ValueString(),
+		ID:             data.ID.ValueString(),
+		Description:    data.Description.ValueString(),
 		AllowedDomains: allowed,
 		Admin:          data.Admin.ValueBool(),
 	}
@@ -185,7 +193,7 @@ func (r *APIKeyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	err := r.client.DeleteAPIKey(ctx, data.Name.ValueString())
+	err := r.client.DeleteAPIKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete API key: %s", err))
 		return

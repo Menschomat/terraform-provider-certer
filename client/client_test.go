@@ -54,13 +54,14 @@ func TestClient_CRUD(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/api/v1/config/certificates" {
 			if r.Method == "GET" {
-				_ = json.NewEncoder(w).Encode([]CertConfig{{Primary: "test.com"}})
+				_ = json.NewEncoder(w).Encode([]CertConfig{{ID: "test-cert-id", Primary: "test.com"}})
 			} else if r.Method == "POST" {
 				w.WriteHeader(http.StatusCreated)
+				_ = json.NewEncoder(w).Encode(CertConfig{ID: "new-cert-id", Primary: "new.com"})
 			}
 			return
 		}
-		if r.URL.Path == "/api/v1/config/certificates/test.com" {
+		if r.URL.Path == "/api/v1/config/certificates/test-cert-id" {
 			if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 			} else if r.Method == "DELETE" {
@@ -70,14 +71,19 @@ func TestClient_CRUD(t *testing.T) {
 		}
 		if r.URL.Path == "/api/v1/config/api_keys" {
 			if r.Method == "GET" {
-				_ = json.NewEncoder(w).Encode([]APIKeyConfig{{Name: "test-key"}})
+				_ = json.NewEncoder(w).Encode([]APIKeyConfig{{ID: "test-key-id", Description: "test-key"}})
 			} else if r.Method == "POST" {
 				w.WriteHeader(http.StatusCreated)
 				_ = json.NewEncoder(w).Encode(APIKeyConfig{
-					Name:           "test-key",
+					ID:             "new-key-id",
+					Description:    "test-key",
 					CleartextToken: "generated-token",
 				})
-			} else if r.Method == "PUT" {
+			}
+			return
+		}
+		if r.URL.Path == "/api/v1/config/api_keys/test-key-id" {
+			if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 			} else if r.Method == "DELETE" {
 				w.WriteHeader(http.StatusNoContent)
@@ -100,17 +106,17 @@ func TestClient_CRUD(t *testing.T) {
 			t.Errorf("GetCertificates failed: %v, certs: %+v", err, certs)
 		}
 
-		err = c.CreateCertificate(context.Background(), CertConfig{Primary: "new.com"})
-		if err != nil {
-			t.Errorf("CreateCertificate failed: %v", err)
+		createdCert, err := c.CreateCertificate(context.Background(), CertConfig{Primary: "new.com"})
+		if err != nil || createdCert.ID != "new-cert-id" {
+			t.Errorf("CreateCertificate failed: %v, createdCert: %+v", err, createdCert)
 		}
 
-		err = c.UpdateCertificate(context.Background(), "test.com", CertConfig{Sans: []string{"www.test.com"}})
+		err = c.UpdateCertificate(context.Background(), "test-cert-id", CertConfig{Sans: []string{"www.test.com"}})
 		if err != nil {
 			t.Errorf("UpdateCertificate failed: %v", err)
 		}
 
-		err = c.DeleteCertificate(context.Background(), "test.com")
+		err = c.DeleteCertificate(context.Background(), "test-cert-id")
 		if err != nil {
 			t.Errorf("DeleteCertificate failed: %v", err)
 		}
@@ -118,21 +124,21 @@ func TestClient_CRUD(t *testing.T) {
 
 	t.Run("APIKeys", func(t *testing.T) {
 		keys, err := c.GetAPIKeys(context.Background())
-		if err != nil || len(keys) != 1 || keys[0].Name != "test-key" {
+		if err != nil || len(keys) != 1 || keys[0].ID != "test-key-id" {
 			t.Errorf("GetAPIKeys failed: %v, keys: %+v", err, keys)
 		}
 
-		createdKey, err := c.CreateAPIKey(context.Background(), APIKeyConfig{Name: "test-key"})
-		if err != nil || createdKey.CleartextToken != "generated-token" {
+		createdKey, err := c.CreateAPIKey(context.Background(), APIKeyConfig{Description: "test-key"})
+		if err != nil || createdKey.CleartextToken != "generated-token" || createdKey.ID != "new-key-id" {
 			t.Errorf("CreateAPIKey failed: %v, createdKey: %+v", err, createdKey)
 		}
 
-		err = c.UpdateAPIKey(context.Background(), APIKeyConfig{Name: "test-key", Admin: true})
+		err = c.UpdateAPIKey(context.Background(), APIKeyConfig{ID: "test-key-id", Description: "test-key", Admin: true})
 		if err != nil {
 			t.Errorf("UpdateAPIKey failed: %v", err)
 		}
 
-		err = c.DeleteAPIKey(context.Background(), "test-key")
+		err = c.DeleteAPIKey(context.Background(), "test-key-id")
 		if err != nil {
 			t.Errorf("DeleteAPIKey failed: %v", err)
 		}

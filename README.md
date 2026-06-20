@@ -170,7 +170,7 @@ Retrieves PEM-encoded certificate chains and private keys once they are successf
 
 ```hcl
 data "certcentral_certificate_data" "example" {
-  domain = certcentral_certificate.example.primary
+  certificate_id = certcentral_certificate.example.id
 }
 
 # Example: Output the certificate body
@@ -187,7 +187,8 @@ resource "aws_acm_certificate" "imported" {
 ```
 
 #### Attribute Reference
-* `domain` (String, Required) - The primary domain of the certificate to fetch.
+* `certificate_id` (String, Required) - The unique configuration UUID of the certificate to fetch.
+* `domain` (String, Computed) - The primary domain of the certificate.
 * `sans` (List of String, Computed) - SANs associated with the certificate.
 * `issued` (Boolean, Computed) - `true` if the certificate has been successfully issued.
 * `certificate` (String, Computed, Sensitive) - The PEM-encoded certificate chain.
