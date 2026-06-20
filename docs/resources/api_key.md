@@ -31,7 +31,7 @@ resource "certcentral_api_key" "web_client" {
 ### Optional
 
 - `allowed_domains` (List of String) The list of domains this standard token is authorized to fetch certs for.
-- `allowed_teams` (List of String) The list of team UUIDs this token is scoped to for certificate retrieval.
+- `allowed_teams` (List of String) The list of team UUIDs this token is scoped to (for configuration management if admin=true, or certificate retrieval if admin=false).
 - `description` (String) A description of the API key configuration.
 
 ### Read-Only

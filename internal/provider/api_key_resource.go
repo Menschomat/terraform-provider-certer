@@ -64,7 +64,7 @@ func (r *APIKeyResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			},
 			"allowed_teams": schema.ListAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "The list of team UUIDs this token is scoped to for certificate retrieval.",
+				MarkdownDescription: "The list of team UUIDs this token is scoped to (for configuration management if admin=true, or certificate retrieval if admin=false).",
 				Optional:            true,
 			},
 			"admin": schema.BoolAttribute{
