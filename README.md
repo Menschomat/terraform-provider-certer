@@ -177,9 +177,19 @@ output "web_client_token" {
 
 #### Argument Reference
 * `description` (String, Optional) - A description of the API key configuration.
-* `allowed_domains` (List of String, Optional) - Domains this standard token is allowed to fetch certificates for.
-* `allowed_teams` (List of String, Optional) - The list of team UUIDs this token is scoped to for certificate retrieval.
-* `admin` (Boolean, Required) - If `true`, this token has administrative rights to call the control plane endpoints and cannot be used to fetch raw certificate private keys.
+* `allowed_domains` (List of String, Optional) - Domains this standard token is allowed to fetch certificates for (ignored for admin tokens).
+* `allowed_teams` (List of String, Optional) - The list of team UUIDs this token is scoped to.
+* `admin` (Boolean, Required) - If `true`, this token is used for configuration management (control plane). If `false`, this is a standard fetch token used to pull raw certificate and private key files.
+
+#### API Key Scoping Matrix
+
+The combination of the `admin` flag and the `allowed_teams` list dictates the token scoping level:
+
+| Key Type | `admin` | `allowed_teams` | Authorized Actions |
+| :--- | :--- | :--- | :--- |
+| **Root Admin** | `true` | Empty / Omitted | Full CRUD access to all configurations (`/api/v1/config/*`) across all teams. |
+| **Scoped Admin** | `true` | List of Team UUIDs | Manage configurations (certificates, keys) ONLY within the specified teams. Cannot manage root admin keys. |
+| **Fetch Key (Standard)** | `false` | List of Team UUIDs | Retrieves raw PEM certificate chain and private key assets (`/api/v1/certificates`) for domains in `allowed_domains` AND `team_id` in `allowed_teams`. Cannot access configuration. |
 
 #### Attribute Reference
 * `cleartext_token` (String, Computed, Sensitive) - The generated plaintext token value. This is only returned by the server on creation and cannot be retrieved on subsequent reads.
