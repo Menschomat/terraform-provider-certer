@@ -1,4 +1,4 @@
-module github.com/menscho/terraform-provider-certcentral
+module github.com/menscho/terraform-provider-certer
 
 go 1.26.4
 

@@ -1,13 +1,13 @@
 terraform {
   required_providers {
-    certcentral = {
-      source  = "Menschomat/certcentral"
+    certer = {
+      source  = "Menschomat/certer"
       version = "~> 1.0"
     }
   }
 }
 
-provider "certcentral" {
+provider "certer" {
   address = "http://localhost:8080"
   token   = "your_admin_api_token"
 }

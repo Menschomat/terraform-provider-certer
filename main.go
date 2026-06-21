@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/menscho/terraform-provider-certcentral/internal/provider"
+	"github.com/menscho/terraform-provider-certer/internal/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "registry.terraform.io/menscho/certcentral",
+		Address: "registry.terraform.io/menscho/certer",
 		Debug:   debug,
 	}
 

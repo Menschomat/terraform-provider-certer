@@ -12,8 +12,8 @@ func TestProvider_Metadata(t *testing.T) {
 	var resp provider.MetadataResponse
 	p.Metadata(context.Background(), provider.MetadataRequest{}, &resp)
 
-	if resp.TypeName != "certcentral" {
-		t.Errorf("Expected TypeName 'certcentral', got %q", resp.TypeName)
+	if resp.TypeName != "certer" {
+		t.Errorf("Expected TypeName 'certer', got %q", resp.TypeName)
 	}
 	if resp.Version != "test" {
 		t.Errorf("Expected Version 'test', got %q", resp.Version)

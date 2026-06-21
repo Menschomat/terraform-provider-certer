@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/menscho/terraform-provider-certcentral/client"
+	"github.com/menscho/terraform-provider-certer/client"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -39,7 +39,7 @@ func (r *APIKeyResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (r *APIKeyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an API key token configuration in cert-central.",
+		MarkdownDescription: "Manages an API key token configuration in certer.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The unique UUID identifier of the API key configuration.",

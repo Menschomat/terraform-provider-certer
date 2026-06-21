@@ -1,11 +1,11 @@
-# Terraform Provider for Cert-Central
+# Terraform Provider for Certer
 
-The Cert-Central Terraform provider allows you to manage SSL/TLS certificate configurations, provision access keys, and fetch issued certificates directly within your Terraform workflows.
+The Certer Terraform provider allows you to manage SSL/TLS certificate configurations, provision access keys, and fetch issued certificates directly within your Terraform workflows.
 
-This provider is designed to interface with **cert-central**, a custom, containerized certificate manager solution currently supporting Let's Encrypt and ZeroSSL. Built on top of the `lego` Go library, it has the capacity to support more ACME providers in the future. The cert-central control plane is scheduled to be released and open-sourced in the near future.
+This provider is designed to interface with **certer**, a custom, containerized certificate manager solution currently supporting Let's Encrypt and ZeroSSL. Built on top of the `lego` Go library, it has the capacity to support more ACME providers in the future. The certer control plane is scheduled to be released and open-sourced in the near future.
 
 > [!IMPORTANT]
-> **Disclaimer:** This provider is for testing purposes only and is currently **not usable** if you do not have access to the private `cert-central` backend. It will become fully functional for general use once the control plane is released and open-sourced.
+> **Disclaimer:** This provider is for testing purposes only and is currently **not usable** if you do not have access to the private `certer` backend. It will become fully functional for general use once the control plane is released and open-sourced.
 
 ---
 
@@ -19,21 +19,21 @@ This provider is designed to interface with **cert-central**, a custom, containe
 
 ## Installation
 
-The Cert-Central provider is published on the official Terraform Registry at [Menschomat/certcentral](https://registry.terraform.io/providers/Menschomat/certcentral/latest).
+The Certer provider is published on the official Terraform Registry at [Menschomat/certer](https://registry.terraform.io/providers/Menschomat/certer/latest).
 
 To use the provider in your Terraform configuration, add it to your `required_providers` block:
 
 ```hcl
 terraform {
   required_providers {
-    certcentral = {
-      source  = "Menschomat/certcentral"
+    certer = {
+      source  = "Menschomat/certer"
       version = "~> 1.0"
     }
   }
 }
 
-provider "certcentral" {
+provider "certer" {
   address = "http://localhost:8080"
   token   = "your_admin_api_token"
 }
@@ -50,8 +50,8 @@ Gitea has a built-in, Terraform-compliant package registry. When you write:
 ```hcl
 terraform {
   required_providers {
-    certcentral = {
-      source  = "gitea.dmz.k8s.menscho.space/m0space/certcentral"
+    certer = {
+      source  = "gitea.dmz.k8s.menscho.space/m0space/certer"
       version = "~> 1.0.0"
     }
   }
@@ -62,15 +62,15 @@ Terraform resolves this by contacting `gitea.dmz.k8s.menscho.space` to download 
 To publish your compiled provider to Gitea's registry:
 1. Compile and zip the provider binary:
    ```bash
-   cd terraform-provider-certcentral
-   go build -o terraform-provider-certcentral
-   zip terraform-provider-certcentral_1.0.0_darwin_arm64.zip terraform-provider-certcentral
+   cd terraform-provider-certer
+   go build -o terraform-provider-certer
+   zip terraform-provider-certer_1.0.0_darwin_arm64.zip terraform-provider-certer
    ```
 2. Upload it to your Gitea instance using `curl` (replace `YOUR_TOKEN` with a Gitea personal access token):
    ```bash
    curl --header "Authorization: token YOUR_TOKEN" \
-        --upload-file terraform-provider-certcentral_1.0.0_darwin_arm64.zip \
-        https://gitea.dmz.k8s.menscho.space/api/packages/m0space/terraform-provider/certcentral/1.0.0/darwin_arm64.zip
+        --upload-file terraform-provider-certer_1.0.0_darwin_arm64.zip \
+        https://gitea.dmz.k8s.menscho.space/api/packages/m0space/terraform-provider/certer/1.0.0/darwin_arm64.zip
    ```
 
 *Note: Gitea automatically handles Terraform service discovery under the hood at your domain's `.well-known/terraform.json` endpoint.*
@@ -80,20 +80,20 @@ For offline use or local development, you can compile the provider and place it 
 
 1. Build and copy the binary to your local plugin mirror directory (adjusting architecture name as needed):
    ```bash
-   cd terraform-provider-certcentral
-   go build -o terraform-provider-certcentral
+   cd terraform-provider-certer
+   go build -o terraform-provider-certer
    
    # For macOS (Apple Silicon):
-   mkdir -p ~/.terraform.d/plugins/gitea.dmz.k8s.menscho.space/m0space/certcentral/1.0.0/darwin_arm64/
-   cp terraform-provider-certcentral ~/.terraform.d/plugins/gitea.dmz.k8s.menscho.space/m0space/certcentral/1.0.0/darwin_arm64/terraform-provider-certcentral_v1.0.0
+   mkdir -p ~/.terraform.d/plugins/gitea.dmz.k8s.menscho.space/m0space/certer/1.0.0/darwin_arm64/
+   cp terraform-provider-certer ~/.terraform.d/plugins/gitea.dmz.k8s.menscho.space/m0space/certer/1.0.0/darwin_arm64/terraform-provider-certer_v1.0.0
    ```
 
 2. Reference your local source in your Terraform configuration:
    ```hcl
    terraform {
      required_providers {
-       certcentral = {
-         source  = "gitea.dmz.k8s.menscho.space/m0space/certcentral"
+       certer = {
+         source  = "gitea.dmz.k8s.menscho.space/m0space/certer"
          version = "1.0.0"
        }
      }
@@ -101,10 +101,10 @@ For offline use or local development, you can compile the provider and place it 
    ```
    When running `terraform init`, it will resolve the provider directly from your local cache directory.
 
-For either option, you must configure the provider block with your `cert-central` endpoint and admin API key:
+For either option, you must configure the provider block with your `certer` endpoint and admin API key:
 
 ```hcl
-provider "certcentral" {
+provider "certer" {
   address = "http://localhost:8080"
   token   = "your_admin_api_token"
 }
@@ -114,12 +114,12 @@ provider "certcentral" {
 
 ## Resources
 
-### 1. `certcentral_team`
+### 1. `certer_team`
 
-Manages a team configuration in `cert-central`. On creation, the server automatically generates a unique UUID v7 identifier for the team.
+Manages a team configuration in `certer`. On creation, the server automatically generates a unique UUID v7 identifier for the team.
 
 ```hcl
-resource "certcentral_team" "example" {
+resource "certer_team" "example" {
   name        = "example-team"
   description = "Example Team Description"
 }
@@ -134,14 +134,14 @@ resource "certcentral_team" "example" {
 
 ---
 
-### 2. `certcentral_certificate`
+### 2. `certer_certificate`
 
-Manages a certificate configuration in the background renewal scheduler. When created, `cert-central` automatically schedules DNS-01/HTTP-01 ACME challenges to issue the certificate.
+Manages a certificate configuration in the background renewal scheduler. When created, `certer` automatically schedules DNS-01/HTTP-01 ACME challenges to issue the certificate.
 
 ```hcl
-resource "certcentral_certificate" "example" {
+resource "certer_certificate" "example" {
   primary = "example.com"
-  team_id = certcentral_team.example.id
+  team_id = certer_team.example.id
   sans    = [
     "*.example.com",
     "www.example.com"
@@ -156,21 +156,21 @@ resource "certcentral_certificate" "example" {
 
 ---
 
-### 3. `certcentral_api_key`
+### 3. `certer_api_key`
 
-Manages client API keys and access scopes in `cert-central`. On creation, the server automatically generates a secure 32-byte token and returns it in cleartext.
+Manages client API keys and access scopes in `certer`. On creation, the server automatically generates a secure 32-byte token and returns it in cleartext.
 
 ```hcl
-resource "certcentral_api_key" "web_client" {
+resource "certer_api_key" "web_client" {
   description     = "web-client-token"
   allowed_domains = ["example.com"]
-  allowed_teams   = [certcentral_team.example.id]
+  allowed_teams   = [certer_team.example.id]
   admin           = false
 }
 
 # The generated cleartext token can be retrieved from state:
 output "web_client_token" {
-  value     = certcentral_api_key.web_client.cleartext_token
+  value     = certer_api_key.web_client.cleartext_token
   sensitive = true
 }
 ```
@@ -198,25 +198,25 @@ The combination of the `admin` flag and the `allowed_teams` list dictates the to
 
 ## Data Sources
 
-### `certcentral_certificate_data`
+### `certer_certificate_data`
 
-Retrieves PEM-encoded certificate chains and private keys once they are successfully issued by `cert-central`. You can pass these to load balancers, CDN, or file structures.
+Retrieves PEM-encoded certificate chains and private keys once they are successfully issued by `certer`. You can pass these to load balancers, CDN, or file structures.
 
 ```hcl
-data "certcentral_certificate_data" "example" {
-  certificate_id = certcentral_certificate.example.id
+data "certer_certificate_data" "example" {
+  certificate_id = certer_certificate.example.id
 }
 
 # Example: Output the certificate body
 output "certificate_pem" {
-  value     = data.certcentral_certificate_data.example.certificate
+  value     = data.certer_certificate_data.example.certificate
   sensitive = true
 }
 
 # Example: Pass details to another resource (e.g. AWS ACM)
 resource "aws_acm_certificate" "imported" {
-  private_key       = data.certcentral_certificate_data.example.private_key
-  certificate_body  = data.certcentral_certificate_data.example.certificate
+  private_key       = data.certer_certificate_data.example.private_key
+  certificate_body  = data.certer_certificate_data.example.certificate
 }
 ```
 
@@ -238,8 +238,8 @@ resource "aws_acm_certificate" "imported" {
 To build the provider binary locally, run:
 
 ```bash
-cd terraform-provider-certcentral
-go build -o terraform-provider-certcentral
+cd terraform-provider-certer
+go build -o terraform-provider-certer
 ```
 
 ### 2. Run Tests
@@ -272,4 +272,3 @@ To test the GoReleaser configuration locally without publishing or signing, inst
 ```bash
 goreleaser build --snapshot --clean
 ```
-

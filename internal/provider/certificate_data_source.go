@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/menscho/terraform-provider-certcentral/client"
+	"github.com/menscho/terraform-provider-certer/client"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -39,7 +39,7 @@ func (d *CertificateDataSource) Metadata(ctx context.Context, req datasource.Met
 
 func (d *CertificateDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Fetches certificate PEM data and private keys for a given certificate configuration ID (UUID) from cert-central.",
+		MarkdownDescription: "Fetches certificate PEM data and private keys for a given certificate configuration ID (UUID) from certer.",
 		Attributes: map[string]schema.Attribute{
 			"certificate_id": schema.StringAttribute{
 				MarkdownDescription: "The unique UUID identifier of the certificate configuration to fetch.",

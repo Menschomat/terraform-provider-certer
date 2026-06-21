@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/menscho/terraform-provider-certcentral/client"
+	"github.com/menscho/terraform-provider-certer/client"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -36,7 +36,7 @@ func (r *TeamResource) Metadata(ctx context.Context, req resource.MetadataReques
 
 func (r *TeamResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a team configuration in cert-central.",
+		MarkdownDescription: "Manages a team configuration in certer.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The unique UUID identifier of the team configuration.",
