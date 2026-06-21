@@ -1,15 +1,12 @@
 ---
 page_title: "certer Provider"
 description: |-
-  The Certer Terraform provider allows you to manage SSL/TLS certificate configurations, provision access keys, and fetch issued certificates directly within your Terraform workflows. This provider is designed to interface with **certer**, a custom, containerized certificate manager solution currently supporting Let's Encrypt and ZeroSSL. Built on top of the `lego` Go library, it has the capacity to support more ACME providers in the future. The certer control plane is scheduled to be released and open-sourced in the near future.
+  The Certer Terraform provider allows you to manage SSL/TLS certificate configurations, provision access keys, and fetch issued certificates directly within your Terraform workflows. This provider is designed to interface with **certer**, a custom, containerized certificate manager solution currently supporting Let's Encrypt and ZeroSSL. Built on top of the `lego` Go library, it has the capacity to support more ACME providers in the future. Both the [Certer control plane](https://github.com/Menschomat/certer) and this provider are open-source projects.
 ---
 
 # certer Provider
 
-The Certer Terraform provider allows you to manage SSL/TLS certificate configurations, provision access keys, and fetch issued certificates directly within your Terraform workflows. This provider is designed to interface with **certer**, a custom, containerized certificate manager solution currently supporting Let's Encrypt and ZeroSSL. Built on top of the `lego` Go library, it has the capacity to support more ACME providers in the future. The certer control plane is scheduled to be released and open-sourced in the near future.
-
-> [!IMPORTANT]
-> **Disclaimer:** This provider is for testing purposes only and is currently **not usable** if you do not have access to the private `certer` backend. It will become fully functional for general use once the control plane is released and open-sourced.
+The Certer Terraform provider allows you to manage SSL/TLS certificate configurations, provision access keys, and fetch issued certificates directly within your Terraform workflows. This provider is designed to interface with **certer**, a custom, containerized certificate manager solution currently supporting Let's Encrypt and ZeroSSL. Built on top of the `lego` Go library, it has the capacity to support more ACME providers in the future. Both the [Certer control plane](https://github.com/Menschomat/certer) and this [Terraform provider](https://github.com/Menschomat/terraform-provider-certer) are open-source projects.
 
 ## Example Usage
 
