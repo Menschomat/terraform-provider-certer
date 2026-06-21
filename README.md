@@ -226,6 +226,15 @@ resource "aws_acm_certificate" "imported" {
 * `private_key` (String, Computed, Sensitive) - The PEM-encoded private key.
 * `cert_filename` (String, Computed) - The filename of the certificate stored on the server.
 * `key_filename` (String, Computed) - The filename of the private key stored on the server.
+* `issued_at` (String, Computed) - The start of validity (`NotBefore`) in RFC3339 format.
+* `expires_at` (String, Computed) - The end of validity (`NotAfter`) in RFC3339 format.
+* `days_remaining` (Integer, Computed) - Number of days remaining before expiration.
+* `is_valid` (Boolean, Computed) - `true` if current time is within validity bounds.
+* `serial_number` (String, Computed) - Hexadecimal serial number of the certificate.
+* `issuer_common_name` (String, Computed) - Common Name (CN) of the issuing authority.
+* `signature_algorithm` (String, Computed) - Name of signature algorithm (e.g. `SHA256-RSA`).
+* `key_algorithm` (String, Computed) - Public key algorithm (e.g. `RSA`, `ECDSA`).
+* `key_size` (Integer, Computed) - Key size in bits (e.g. `2048`, `256`).
 
 ---
 
