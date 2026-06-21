@@ -93,13 +93,13 @@ type CertConfig struct {
 }
 
 type APIKeyConfig struct {
-	ID             string   `json:"id,omitempty"`
-	Token          string   `json:"token,omitempty"`
-	CleartextToken string   `json:"cleartext_token,omitempty"`
-	Description    string   `json:"description,omitempty"`
-	AllowedDomains []string `json:"allowed_domains,omitempty"`
-	AllowedTeams   []string `json:"allowed_teams,omitempty"`
-	Admin          bool     `json:"admin"`
+	ID                  string   `json:"id,omitempty"`
+	Token               string   `json:"token,omitempty"`
+	CleartextToken      string   `json:"cleartext_token,omitempty"`
+	Description         string   `json:"description,omitempty"`
+	AllowedCertificates []string `json:"allowed_certificates,omitempty"`
+	AllowedTeams        []string `json:"allowed_teams,omitempty"`
+	Admin               bool     `json:"admin"`
 }
 
 type CertificateData struct {

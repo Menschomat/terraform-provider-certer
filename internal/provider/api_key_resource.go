@@ -21,12 +21,12 @@ type APIKeyResource struct {
 }
 
 type APIKeyResourceModel struct {
-	ID             types.String   `tfsdk:"id"`
-	Description    types.String   `tfsdk:"description"`
-	CleartextToken types.String   `tfsdk:"cleartext_token"`
-	AllowedDomains []types.String `tfsdk:"allowed_domains"`
-	AllowedTeams   []types.String `tfsdk:"allowed_teams"`
-	Admin          types.Bool     `tfsdk:"admin"`
+	ID                  types.String   `tfsdk:"id"`
+	Description         types.String   `tfsdk:"description"`
+	CleartextToken      types.String   `tfsdk:"cleartext_token"`
+	AllowedCertificates []types.String `tfsdk:"allowed_certificates"`
+	AllowedTeams        []types.String `tfsdk:"allowed_teams"`
+	Admin               types.Bool     `tfsdk:"admin"`
 }
 
 func NewAPIKeyResource() resource.Resource {
@@ -57,9 +57,9 @@ func (r *APIKeyResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Computed:            true,
 				Sensitive:           true,
 			},
-			"allowed_domains": schema.ListAttribute{
+			"allowed_certificates": schema.ListAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "The list of domains this standard token is authorized to fetch certs for.",
+				MarkdownDescription: "The list of certificate configuration UUIDs this standard token is authorized to fetch.",
 				Optional:            true,
 			},
 			"allowed_teams": schema.ListAttribute{
@@ -97,8 +97,8 @@ func (r *APIKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	allowed := []string{}
-	for _, ad := range data.AllowedDomains {
-		allowed = append(allowed, ad.ValueString())
+	for _, ac := range data.AllowedCertificates {
+		allowed = append(allowed, ac.ValueString())
 	}
 
 	allowedTeams := []string{}
@@ -107,10 +107,10 @@ func (r *APIKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	key := client.APIKeyConfig{
-		Description:    data.Description.ValueString(),
-		AllowedDomains: allowed,
-		AllowedTeams:   allowedTeams,
-		Admin:          data.Admin.ValueBool(),
+		Description:         data.Description.ValueString(),
+		AllowedCertificates: allowed,
+		AllowedTeams:        allowedTeams,
+		Admin:               data.Admin.ValueBool(),
 	}
 
 	createdKey, err := r.client.CreateAPIKey(ctx, key)
@@ -145,10 +145,10 @@ func (r *APIKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 			data.Description = types.StringValue(k.Description)
 			data.Admin = types.BoolValue(k.Admin)
 			allowedVal := []types.String{}
-			for _, ad := range k.AllowedDomains {
-				allowedVal = append(allowedVal, types.StringValue(ad))
+			for _, ac := range k.AllowedCertificates {
+				allowedVal = append(allowedVal, types.StringValue(ac))
 			}
-			data.AllowedDomains = allowedVal
+			data.AllowedCertificates = allowedVal
 			allowedTeamsVal := []types.String{}
 			for _, at := range k.AllowedTeams {
 				allowedTeamsVal = append(allowedTeamsVal, types.StringValue(at))
@@ -183,8 +183,8 @@ func (r *APIKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	data.CleartextToken = state.CleartextToken
 
 	allowed := []string{}
-	for _, ad := range data.AllowedDomains {
-		allowed = append(allowed, ad.ValueString())
+	for _, ac := range data.AllowedCertificates {
+		allowed = append(allowed, ac.ValueString())
 	}
 
 	allowedTeams := []string{}
@@ -193,11 +193,11 @@ func (r *APIKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	key := client.APIKeyConfig{
-		ID:             data.ID.ValueString(),
-		Description:    data.Description.ValueString(),
-		AllowedDomains: allowed,
-		AllowedTeams:   allowedTeams,
-		Admin:          data.Admin.ValueBool(),
+		ID:                  data.ID.ValueString(),
+		Description:         data.Description.ValueString(),
+		AllowedCertificates: allowed,
+		AllowedTeams:        allowedTeams,
+		Admin:               data.Admin.ValueBool(),
 	}
 
 	err := r.client.UpdateAPIKey(ctx, key)

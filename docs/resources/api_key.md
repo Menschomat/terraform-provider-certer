@@ -14,10 +14,10 @@ Manages an API key token configuration in certer.
 
 ```terraform
 resource "certer_api_key" "web_client" {
-  description     = "web-client"
-  allowed_domains = ["example.com"]
-  allowed_teams   = [certer_team.example.id]
-  admin           = false
+  description          = "web-client"
+  allowed_certificates = [certer_certificate.example.id]
+  allowed_teams        = [certer_team.example.id]
+  admin                = false
 }
 ```
 
@@ -30,7 +30,7 @@ resource "certer_api_key" "web_client" {
 
 ### Optional
 
-- `allowed_domains` (List of String) The list of domains this standard token is authorized to fetch certs for.
+- `allowed_certificates` (List of String) The list of certificate configuration UUIDs this standard token is authorized to fetch.
 - `allowed_teams` (List of String) The list of team UUIDs this token is scoped to (for configuration management if admin=true, or certificate retrieval if admin=false).
 - `description` (String) A description of the API key configuration.
 
