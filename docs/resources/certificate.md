@@ -34,6 +34,7 @@ resource "certer_certificate" "example" {
 ### Optional
 
 - `description` (String) A description of the certificate configuration.
+- `dns_provider` (String) Optional custom DNS provider for DNS-01 challenges (e.g. `cloudflare`, `hetzner`). If omitted, uses the global default provider.
 - `sans` (List of String) Subject Alternative Names (SANs) for the certificate.
 
 ### Read-Only

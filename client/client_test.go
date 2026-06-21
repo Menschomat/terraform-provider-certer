@@ -54,15 +54,27 @@ func TestClient_CRUD(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/api/v1/config/certificates" {
 			if r.Method == "GET" {
-				_ = json.NewEncoder(w).Encode([]CertConfig{{ID: "test-cert-id", Primary: "test.com"}})
+				_ = json.NewEncoder(w).Encode([]CertConfig{{ID: "test-cert-id", Primary: "test.com", DNSProvider: "hetzner"}})
 			} else if r.Method == "POST" {
+				var reqCert CertConfig
+				_ = json.NewDecoder(r.Body).Decode(&reqCert)
+				if reqCert.DNSProvider != "hetzner" {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
 				w.WriteHeader(http.StatusCreated)
-				_ = json.NewEncoder(w).Encode(CertConfig{ID: "new-cert-id", Primary: "new.com"})
+				_ = json.NewEncoder(w).Encode(CertConfig{ID: "new-cert-id", Primary: "new.com", DNSProvider: "hetzner"})
 			}
 			return
 		}
 		if r.URL.Path == "/api/v1/config/certificates/test-cert-id" {
 			if r.Method == "PUT" {
+				var reqCert CertConfig
+				_ = json.NewDecoder(r.Body).Decode(&reqCert)
+				if reqCert.DNSProvider != "cloudflare" {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
 				w.WriteHeader(http.StatusOK)
 			} else if r.Method == "DELETE" {
 				w.WriteHeader(http.StatusNoContent)
@@ -119,16 +131,16 @@ func TestClient_CRUD(t *testing.T) {
 
 	t.Run("Certificates", func(t *testing.T) {
 		certs, err := c.GetCertificates(context.Background())
-		if err != nil || len(certs) != 1 || certs[0].Primary != "test.com" {
+		if err != nil || len(certs) != 1 || certs[0].Primary != "test.com" || certs[0].DNSProvider != "hetzner" {
 			t.Errorf("GetCertificates failed: %v, certs: %+v", err, certs)
 		}
 
-		createdCert, err := c.CreateCertificate(context.Background(), CertConfig{Primary: "new.com"})
-		if err != nil || createdCert.ID != "new-cert-id" {
+		createdCert, err := c.CreateCertificate(context.Background(), CertConfig{Primary: "new.com", DNSProvider: "hetzner"})
+		if err != nil || createdCert.ID != "new-cert-id" || createdCert.DNSProvider != "hetzner" {
 			t.Errorf("CreateCertificate failed: %v, createdCert: %+v", err, createdCert)
 		}
 
-		err = c.UpdateCertificate(context.Background(), "test-cert-id", CertConfig{Sans: []string{"www.test.com"}})
+		err = c.UpdateCertificate(context.Background(), "test-cert-id", CertConfig{Sans: []string{"www.test.com"}, DNSProvider: "cloudflare"})
 		if err != nil {
 			t.Errorf("UpdateCertificate failed: %v", err)
 		}

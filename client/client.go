@@ -89,6 +89,7 @@ type CertConfig struct {
 	Sans        []string `json:"sans,omitempty"`
 	TeamID      string   `json:"team_id"`
 	Description string   `json:"description,omitempty"`
+	DNSProvider string   `json:"dns_provider,omitempty"`
 }
 
 type APIKeyConfig struct {

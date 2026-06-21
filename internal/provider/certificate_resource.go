@@ -26,6 +26,7 @@ type CertificateResourceModel struct {
 	Sans        []types.String `tfsdk:"sans"`
 	TeamID      types.String   `tfsdk:"team_id"`
 	Description types.String   `tfsdk:"description"`
+	DNSProvider types.String   `tfsdk:"dns_provider"`
 }
 
 func NewCertificateResource() resource.Resource {
@@ -64,6 +65,10 @@ func (r *CertificateResource) Schema(ctx context.Context, req resource.SchemaReq
 				MarkdownDescription: "A description of the certificate configuration.",
 				Optional:            true,
 			},
+			"dns_provider": schema.StringAttribute{
+				MarkdownDescription: "Optional custom DNS provider for DNS-01 challenges (e.g. `cloudflare`, `hetzner`). If omitted, uses the global default provider.",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -99,6 +104,7 @@ func (r *CertificateResource) Create(ctx context.Context, req resource.CreateReq
 		Sans:        sans,
 		TeamID:      data.TeamID.ValueString(),
 		Description: data.Description.ValueString(),
+		DNSProvider: data.DNSProvider.ValueString(),
 	}
 
 	createdCert, err := r.client.CreateCertificate(ctx, cert)
@@ -132,6 +138,11 @@ func (r *CertificateResource) Read(ctx context.Context, req resource.ReadRequest
 			data.Primary = types.StringValue(c.Primary)
 			data.TeamID = types.StringValue(c.TeamID)
 			data.Description = types.StringValue(c.Description)
+			if c.DNSProvider == "" {
+				data.DNSProvider = types.StringNull()
+			} else {
+				data.DNSProvider = types.StringValue(c.DNSProvider)
+			}
 			sansVal := []types.String{}
 			for _, s := range c.Sans {
 				sansVal = append(sansVal, types.StringValue(s))
@@ -166,6 +177,7 @@ func (r *CertificateResource) Update(ctx context.Context, req resource.UpdateReq
 		Sans:        sans,
 		TeamID:      data.TeamID.ValueString(),
 		Description: data.Description.ValueString(),
+		DNSProvider: data.DNSProvider.ValueString(),
 	}
 
 	err := r.client.UpdateCertificate(ctx, data.ID.ValueString(), cert)
